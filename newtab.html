@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tab - Steady</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            font-family: system-ui, -apple-system, sans-serif;
+            color: #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 700;
+            color: #60a5fa;
+            margin-bottom: 16px;
+            text-shadow: 0 0 40px rgba(96, 165, 250, 0.4);
+        }
+
+        .tagline {
+            font-size: 18px;
+            color: #9ca3af;
+            margin-bottom: 40px;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 20px 60px 20px 24px;
+            font-size: 18px;
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            border-radius: 16px;
+            background: rgba(30, 41, 59, 0.8);
+            color: #e5e7eb;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: #6b7280;
+        }
+
+        .voice-btn {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .voice-btn:hover {
+            background: rgba(234, 179, 8, 0.2);
+        }
+
+        .shortcuts {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 800px;
+        }
+
+        .shortcut {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 30px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 2px solid rgba(96, 165, 250, 0.2);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #e5e7eb;
+            min-width: 120px;
+        }
+
+        .shortcut:hover {
+            background: rgba(96, 165, 250, 0.15);
+            border-color: rgba(96, 165, 250, 0.5);
+            transform: translateY(-4px);
+        }
+
+        .shortcut-icon {
+            font-size: 32px;
+        }
+
+        .shortcut-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .mode-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            border-radius: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mode-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #60a5fa;
+        }
+
+        .mode-dot.mode-0 {
+            background: #ef4444;
+        }
+
+        .mode-dot.mode-1 {
+            background: #60a5fa;
+        }
+
+        .mode-dot.mode-2 {
+            background: #22c55e;
+        }
+
+        /* Side menu styles - same as content.js */
+        #sa_sidemenu {
+            position: fixed;
+            left: -320px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2147483647;
+            width: 300px;
+            max-height: 90vh;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(96, 165, 250, 0.5);
+            border-radius: 0 16px 16px 0;
+            box-shadow: 4px 0 25px rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            font-family: system-ui, sans-serif;
+            color: #e5e7eb;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            pointer-events: none;
+        }
+
+        #sa_sidemenu.show {
+            left: 0;
+            pointer-events: auto;
+        }
+
+        #sa_sidemenu .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+        }
+
+        #sa_sidemenu .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            margin: 16px 0 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #sa_sidemenu .mode-btn {
+            display: block;
+            width: 100%;
+            padding: 20px 16px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(96, 165, 250, 0.4);
+            border-radius: 10px;
+            background: transparent;
+            color: #e5e7eb;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        #sa_sidemenu .mode-btn:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
+        #sa_sidemenu .mode-btn.active {
+            background: #60a5fa;
+            color: #071225;
+            border-color: #60a5fa;
+        }
+
+        #sa_sidemenu .mode-btn.disabled {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+        }
+
+        #sa_sidemenu .mode-label {
+            font-weight: 600;
+        }
+
+        #sa_sidemenu .mode-desc {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        #sa_sidemenu .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 20px 16px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(96, 165, 250, 0.4);
+            border-radius: 10px;
+            background: transparent;
+            color: #e5e7eb;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        #sa_sidemenu .action-btn:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
+        #sa_sidemenu .action-btn .icon {
+            font-size: 20px;
+        }
+
+        #sa_sidemenu .action-btn .label {
+            font-size: 14px;
+        }
+
+        /* Colored action buttons */
+        #sa_sidemenu .action-btn[data-action="close"] {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        #sa_sidemenu .action-btn[data-action="close"]:hover {
+            background: rgba(239, 68, 68, 0.35);
+        }
+
+        #sa_sidemenu .action-btn[data-action="new"] {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.15);
+        }
+
+        #sa_sidemenu .action-btn[data-action="new"]:hover {
+            background: rgba(34, 197, 94, 0.35);
+        }
+
+        #sa_sidemenu .action-btn[data-action="voice"] {
+            border-color: #eab308;
+            background: rgba(234, 179, 8, 0.15);
+        }
+
+        #sa_sidemenu .action-btn[data-action="voice"]:hover {
+            background: rgba(234, 179, 8, 0.35);
+        }
+
+        .time-display {
+            font-size: 72px;
+            font-weight: 200;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .date-display {
+            font-size: 18px;
+            color: #9ca3af;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="time-display" id="timeDisplay">00:00</div>
+        <div class="date-display" id="dateDisplay">Loading...</div>
+
+        <div class="logo">Steady</div>
+        <div class="tagline">Accessibility-first browsing</div>
+
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search Google or type a URL"
+                autofocus>
+            <button class="voice-btn" id="voiceBtn">🎤</button>
+        </div>
+
+        <div class="shortcuts">
+            <a href="https://www.google.com" class="shortcut">
+                <span class="shortcut-icon">🔍</span>
+                <span class="shortcut-label">Google</span>
+            </a>
+            <a href="https://www.youtube.com" class="shortcut">
+                <span class="shortcut-icon">▶️</span>
+                <span class="shortcut-label">YouTube</span>
+            </a>
+            <a href="https://mail.google.com" class="shortcut">
+                <span class="shortcut-icon">📧</span>
+                <span class="shortcut-label">Gmail</span>
+            </a>
+            <a href="https://www.wikipedia.org" class="shortcut">
+                <span class="shortcut-icon">📚</span>
+                <span class="shortcut-label">Wikipedia</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Load main extension logic -->
+    <script src="src/content.js"></script>
+    <script src="newtab.js"></script>
+</body>
+
+</html>
